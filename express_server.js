@@ -25,9 +25,9 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = { urlDatabase };
@@ -50,12 +50,16 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL])
 });
 
-
 // POST method handlers
 app.post("/urls", (req, res) => {
-  const randomString = generateUniqueRandomString()
-  urlDatabase[randomString] = req.body.longURL;
-  res.redirect(`/urls/${randomString}`)
+  const shortUrl = generateUniqueRandomString()
+  urlDatabase[shortUrl] = req.body.longURL;
+  res.redirect(`/urls/${shortUrl}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect(`/urls`);
 });
 
 
