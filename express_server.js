@@ -17,7 +17,7 @@ const app = express();
 
 // Middleware set-up
 app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // GET method handlers
@@ -39,14 +39,23 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shorURL]};
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+  };
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  res.redirect(urlDatabase[req.params.shortURL])
+});
+
+
 // POST method handlers
 app.post("/urls", (req, res) => {
-  console.log(req.body);  
-  res.send("Ok");         
+  const randomString = generateUniqueRandomString()
+  urlDatabase[randomString] = req.body.longURL;
+  res.redirect(`/urls/${randomString}`)
 });
 
 
