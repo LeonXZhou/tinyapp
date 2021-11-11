@@ -1,9 +1,14 @@
 // Server constants
 const PORT = 8080; // default port 8080
 const urlDatabase = {
-  // psuedo Database;
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
 
 const users = {
@@ -49,7 +54,7 @@ app.use(cookieParser());
 
 app.get("/urls", (req, res) => {
   const templateVars = { urlDatabase, user: users[req.cookies["user_id"]], };
-  console.log(users[req.cookies["user_id"]])
+  console.log(urlDatabase['b6UTxQ'].longURL)
   res.render("urls_index", templateVars);
 });
 
@@ -61,14 +66,14 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longUrl,
     user: users[req.cookies["user_id"]],
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL])
+  res.redirect(urlDatabase[req.params.shortURL].longURL)
 });
 
 app.get("/register", (req, res) => {
@@ -86,7 +91,8 @@ app.get("/login", (req, res) => {
 // POST method handlers
 app.post("/urls", (req, res) => {
   const shortUrl = generateUniqueUrl()
-  urlDatabase[shortUrl] = req.body.longURL;
+  urlDatabase[shortUrl]  = {longURL: req.body.longURL, userID: req.cookies["user_id"]} ;
+  console.log(urlDatabase)
   res.redirect(`/urls/${shortUrl}`);
 });
 
@@ -96,7 +102,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newLongURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
   res.redirect(`/urls`);
 });
 
