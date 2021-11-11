@@ -49,6 +49,7 @@ app.use(cookieParser());
 
 app.get("/urls", (req, res) => {
   const templateVars = { urlDatabase, user: users[req.cookies["user_id"]], };
+  console.log(users[req.cookies["user_id"]])
   res.render("urls_index", templateVars);
 });
 
