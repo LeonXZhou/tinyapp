@@ -12,6 +12,7 @@
   <%- include ('partials/_header.ejs') %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
+    <% if (user !== undefined){ %>
     <table class="table">
       <thead>
         <tr>
@@ -34,6 +35,9 @@
               <button type="submit" class="btn btn-primary">DELETE</button>
             </form></td>
           </tr>
+        <% } %>
+      <% }else{ %>
+        <p>Please login to see your urls</p>
         <% } %>
       </tbody>
     </table>

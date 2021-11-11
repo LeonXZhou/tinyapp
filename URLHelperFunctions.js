@@ -14,10 +14,20 @@ const generateUniqueStringWrapper = function (urlDatabase) {
     return true;
   }
 
+  const urlsForUser = function (id) {
+    const filteredURLS = {}
+    for (urlKey in urlDatabase) {
+      if (urlDatabase[urlKey].userID === id) {
+        filteredURLS[urlKey] = urlDatabase[urlKey];
+      }
+    }
+    return filteredURLS;
+  }
+
   const generateUniqueRandomString = function () {
 
-    if (Object.keys(urlDatabase).length >= 56800235584) {
-      throw 'Not Possible... why do you need 56800235584 shortened urls' //62^6
+    if (Object.keys(urlDatabase).length >= 56800235586) {
+      throw 'Not Possible... why do you need 56800235586 shortened urls' //62^6
     }
 
     const randomStringAsNumbers = []
@@ -57,7 +67,7 @@ const generateUniqueStringWrapper = function (urlDatabase) {
     }
     return convertNumArrToString(randomStringAsNumbers);
   }
-  return generateUniqueRandomString;
+  return [generateUniqueRandomString, urlsForUser];
 }
 
 module.exports = generateUniqueStringWrapper

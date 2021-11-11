@@ -15,6 +15,7 @@ const userHelperFunctionWrapper = function(users)
   {
     for (const user in users)
     {
+      console.log('4', newEmail,users[user].email)
       if (users[user].email === newEmail)
       {
         return false;
@@ -25,10 +26,13 @@ const userHelperFunctionWrapper = function(users)
 
   const authenticateUser = function(testEmail,testPassword)
   {
+    console.log("1")
     if (!checkEmailUniqueness(testEmail))
     {
+      console.log("2")
       if(users[getUID(testEmail)].password === testPassword)
       {
+        console.log("3")
         return true;
       }
     }
