@@ -16,10 +16,13 @@
     </div>
     
     <div>
-      <% if (username){ %>
+      <% if (user){ %>
         <form method="POST" action= '/logout'>
           <button type="submit" class="btn btn-primary">Logout</button>
         </form>
+        <div>
+          <h5 class="card-title">Logged in as <%= user.email %></h5>
+        </div>
       <% }else{ %>
         <form class="form-inline" action="/login" method="POST">
           <div class="form-group mb-2">
@@ -29,10 +32,10 @@
             <button type="submit" class="btn btn-primary">Login</button>
           </div>
         </form>
+        <div>
+          <h5 class="card-title">not logged in</h5>
+        </div>
       <% } %>
-    </div>
-    <div>
-      <h5 class="card-title">Logged in as <%= username %></h5>
     </div>
 
   </nav>
