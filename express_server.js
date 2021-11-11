@@ -27,7 +27,7 @@ const generateUniqueStringWrapper = require("./uniqueRandomStringHelper");
 const userHelperFunctionWrapper = require("./userHelperFunctions");
 const generateUniqueUrl = generateUniqueStringWrapper(urlDatabase);
 const generateUniqueUserID = generateUniqueStringWrapper(users);
-const checkEmailUniqueness = userHelperFunctionWrapper(users);
+const {checkEmailUniqueness,authenticateUser,getUID} = userHelperFunctionWrapper(users);
 
 // Express Server Declaration
 const app = express();
@@ -99,11 +99,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
-  res.redirect(`/urls`);
-});
-
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id')
   res.redirect(`/urls`);
@@ -121,9 +116,20 @@ app.post("/register", (req, res) => {
     res.redirect(`/urls`);
   }
   else{
-    res.status(400).send('Error: the email you entered is already in use')
+    return res.status(400).send('Error 400: the email you entered is already in use')
   }
 });
+
+app.post("/login", (req, res) => {
+  if (authenticateUser(req.body.email,req.body.password)) {
+    res.cookie('user_id', getUID(req.body.email));
+    res.redirect(`/urls`);
+  }
+  else{
+    res.status(403).send('Error 403: Login Information Inccorect')
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Express Server Listening on ${PORT}!`);
