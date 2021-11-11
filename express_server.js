@@ -71,11 +71,15 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  console.log(req.cookies["user_id"])
-  console.log(users)
   const templateVars = { user: users[req.cookies["user_id"]], };
   res.render("register", templateVars);
 });
+
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies["user_id"]], };
+  res.render("login", templateVars);
+});
+
 
 
 // POST method handlers
@@ -101,7 +105,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username')
+  res.clearCookie('user_id')
   res.redirect(`/urls`);
 });
 

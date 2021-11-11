@@ -11,32 +11,19 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>      
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
+        <% if (!user){ %>
+          <a class="nav-item nav-link" href="/login">Login</a>
+        <% } %> 
       </div>
     </div>
-    
-    <div>
-      <% if (user){ %>
-        <form method="POST" action= '/logout'>
-          <button type="submit" class="btn btn-primary">Logout</button>
-        </form>
-        <div>
-          <h5 class="card-title">Logged in as <%= user.email %></h5>
-        </div>
-      <% }else{ %>
-        <form class="form-inline" action="/login" method="POST">
-          <div class="form-group mb-2">
-            <label for="longURL">Enter your username:</label>
-            <input class="form-control" type="text" name="username" placeholder="Username"
-              style="width: 300px; margin: 1em">
-            <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-        </form>
-        <div>
-          <h5 class="card-title">not logged in</h5>
-        </div>
-      <% } %>
-    </div>
+    <% if (user){ %>
+    <p>Logged in as <%= user.email%></p>
+    <form method="POST" action= '/logout'> 
+      <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
+    <% } %> 
 
   </nav>
 </header>
