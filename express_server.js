@@ -23,9 +23,11 @@ const users = {
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser")
-const generateUniqueStringWrapper = require("./uniqueRandomStringHelper")
+const generateUniqueStringWrapper = require("./uniqueRandomStringHelper");
+const userHelperFunctionWrapper = require("./userHelperFunctions");
 const generateUniqueUrl = generateUniqueStringWrapper(urlDatabase);
 const generateUniqueUserID = generateUniqueStringWrapper(users);
+const checkEmailUniqueness = userHelperFunctionWrapper(users);
 
 // Express Server Declaration
 const app = express();
@@ -105,13 +107,18 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   const UID = generateUniqueUserID();
-  users[UID] = {
-    id: UID,
-    email: req.body.email,
-    password:req.body.password,
+  if (checkEmailUniqueness(req.body.email)) {
+    users[UID] = {
+      id: UID,
+      email: req.body.email,
+      password: req.body.password,
+    }
+    res.cookie('user_id', UID);
+    res.redirect(`/urls`);
   }
-  res.cookie('user_id',UID);
-  res.redirect(`/urls`);
+  else{
+    res.status(400).send('Error: the email you entered is already in use')
+  }
 });
 
 app.listen(PORT, () => {
