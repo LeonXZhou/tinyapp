@@ -24,12 +24,18 @@ const users = {
   }
 };
 
-// required library import
+// required npm library import
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session')
+
+// local js import (helper functions)
 const generateUniqueStringWrapper = require("./URLHelperFunctions");
 const userHelperFunctionWrapper = require("./userHelperFunctions");
+
+//destructuring functions with correct "databse enclosed"
 const [generateUniqueUrl, urlsForUser] = generateUniqueStringWrapper(urlDatabase);
 const [generateUniqueUserID,] = generateUniqueStringWrapper(users);
 const { checkEmailUniqueness, authenticateUser, getUID } = userHelperFunctionWrapper(users);
@@ -41,6 +47,12 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['pi314','e278'],
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 
 // GET method handlers
@@ -53,14 +65,14 @@ app.use(cookieParser());
 // });
 
 app.get("/urls", (req, res) => {
-  const filteredURL = urlsForUser(req.cookies["user_id"])
-  const templateVars = { urlDatabase: filteredURL, user: users[req.cookies["user_id"]], };
+  const filteredURL = urlsForUser(req.cookies.use_id)
+  const templateVars = { urlDatabase: filteredURL, user: users[req.cookies.use_id], };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.cookies["user_id"]], };
-  if (req.cookies["user_id"]) {
+  const templateVars = { user: users[req.cookies.use_id], };
+  if (req.cookies.use_id) {
     res.render("urls_new", templateVars);
   }
   else {
@@ -70,11 +82,11 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
-    if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    if (urlDatabase[req.params.shortURL].userID === req.cookies.use_id) {
       const templateVars = {
         shortURL: req.params.shortURL,
         longURL: urlDatabase[req.params.shortURL].longUrl,
-        user: users[req.cookies["user_id"]],
+        user: users[req.cookies.use_id],
       };
       res.render("urls_show", templateVars);
     } else {
@@ -90,12 +102,12 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: users[req.cookies["user_id"]], };
+  const templateVars = { user: users[req.cookies.use_id], };
   res.render("register", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: users[req.cookies["user_id"]], };
+  const templateVars = { user: users[req.cookies.use_id], };
   res.render("login", templateVars);
 });
 
@@ -104,8 +116,8 @@ app.get("/login", (req, res) => {
 // POST method handlers
 app.post("/urls", (req, res) => {
   const shortUrl = generateUniqueUrl()
-  if (req.cookies["user_id"]) {
-    urlDatabase[shortUrl] = { longURL: req.body.longURL, userID: req.cookies["user_id"] };
+  if (req.cookies.use_id) {
+    urlDatabase[shortUrl] = { longURL: req.body.longURL, userID: req.cookies.use_id };
     res.redirect(`/urls/${shortUrl}`);
   }
   else {
@@ -115,7 +127,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
-    if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    if (urlDatabase[req.params.shortURL].userID === req.cookies.use_id) {
       delete urlDatabase[req.params.shortURL];
       res.redirect(`/urls`);
     } else {
@@ -127,7 +139,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
-    if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    if (urlDatabase[req.params.shortURL].userID === req.cookies.use_id) {
       urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
       res.redirect(`/urls`);
     } else {
@@ -138,20 +150,25 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id')
+  req.session = null
   res.redirect(`/urls`);
 });
 
 app.post("/register", (req, res) => {
-  const UID = generateUniqueUserID();
   if (checkEmailUniqueness(req.body.email)) {
-    users[UID] = {
-      id: UID,
-      email: req.body.email,
-      password: req.body.password,
-    }
-    res.cookie('user_id', UID);
-    res.redirect(`/urls`);
+    bcrypt.genSalt(10)
+      .then((salt) => { return bcrypt.hash("req.body.password", salt) })
+      .then((hashedPassword) => {
+        const UID = generateUniqueUserID()
+        users[UID] = {
+          id: UID,
+          email: req.body.email,
+          password: bcrypt.hashSync(req.body.password, 10), //stores hashed password
+        }
+        req.session.user_id = UID;
+        res.redirect(`/urls`);
+      })
+      .catch((err) => { console.log(err) });
   }
   else {
     return res.status(400).send('Error 400: the email you entered is already in use')
@@ -159,12 +176,22 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if (authenticateUser(req.body.email, req.body.password)) {
-    res.cookie('user_id', getUID(req.body.email));
-    res.redirect(`/urls`);
+  if(!checkEmailUniqueness(req.body.email)){
+  const serverHashPassword = users[getUID(req.body.email)].password
+  bcrypt.compare(req.body.password, serverHashPassword)
+    .then((value) => {
+      if (value) {
+        req.session.user_id = getUID(req.body.email);
+        res.redirect(`/urls`);
+      }
+      else {
+        res.status(403).send('Error 403: Login Information Inccorect')
+      }
+    })
+    .catch((err) => { console.log(err) })
   }
   else {
-    res.status(403).send('Error 403: Login Information Inccorect')
+    res.status(403).send('Error 403: No one here with that email! learn to type')
   }
 });
 

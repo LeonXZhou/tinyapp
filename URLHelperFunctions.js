@@ -27,7 +27,7 @@ const generateUniqueStringWrapper = function (urlDatabase) {
   const generateUniqueRandomString = function () {
 
     if (Object.keys(urlDatabase).length >= 56800235586) {
-      throw 'Not Possible... why do you need 56800235586 shortened urls' //62^6
+      throw 'Not Possible... why do you need more than 56800235586 shortened urls or users for' //62^6
     }
 
     const randomStringAsNumbers = []
