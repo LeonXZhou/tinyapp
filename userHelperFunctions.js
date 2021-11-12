@@ -1,5 +1,6 @@
 const userHelperFunctionWrapper = function(users)
 {
+  /** returns the user id for a given email */
   const getUID = function (newEmail)
   {
     for (const user in users)
@@ -10,7 +11,7 @@ const userHelperFunctionWrapper = function(users)
       }
     }
   }
-
+  /** checks if the supplied email is unique in the user database */
   const checkEmailUniqueness = function(newEmail)
   {
     for (const user in users)
@@ -23,22 +24,6 @@ const userHelperFunctionWrapper = function(users)
     return true;
   }
 
-  /**
-   * Will need to revisit the authenticate function to see how to implement it asyncronously.
-   * Currently authentication is happening in the post route for login (not very modular, big sad)
-   */
-
-  // const authenticateUser = function(testEmail,testPassword)
-  // {
-  //   if (!checkEmailUniqueness(testEmail))
-  //   {
-  //     if(users[getUID(testEmail)].password === testPassword)
-  //     {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
   return {checkEmailUniqueness, getUID};
 }
 
