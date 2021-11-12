@@ -35,7 +35,12 @@
               <button type="submit" class="btn btn-primary">DELETE</button>
             </form></td>
           </tr>
-        <% } %>
+          <% } %>
+          <tr>
+            <td><form method="GET" action="/urls/new" >
+              <button type="submit" class="btn btn-primary">Add New</button>
+            </form></td>
+          </tr>
       <% }else{ %>
         <p>Please login to see your urls</p>
         <% } %>
