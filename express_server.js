@@ -76,7 +76,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.session.user_id], };
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     res.render("urls_new", templateVars);
   } else {
     res.render("login", templateVars);
@@ -94,7 +94,7 @@ app.get("/urls/:shortURL", (req, res) => {
       res.render("urls_show", templateVars);
     } else {
       res.status(400).send('Error 400: you do not have access to this url either because you'
-      +'are not logged in or this was not a url you created');
+        + 'are not logged in or this was not a url you created');
     }
   } else {
     res.status(404).send('Error 404: short url not found');
@@ -112,12 +112,22 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.session.user_id], };
-  res.render("register", templateVars);
+  if (users[req.session.user_id]) {
+    res.redirect("/urls")
+  }
+  else {
+    res.render("register", templateVars);
+  }
 });
 
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.session.user_id], };
-  res.render("login", templateVars);
+  if (users[req.session.user_id]) {
+    res.redirect("/urls")
+  }
+  else {
+    res.render("login", templateVars);
+  }
 });
 
 
@@ -125,7 +135,7 @@ app.get("/login", (req, res) => {
 // POST method handlers
 app.post("/urls", (req, res) => {
   const shortUrl = generateUniqueUrl();
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     urlDatabase[shortUrl] = { longURL: req.body.longURL, userID: req.session.user_id };
     res.redirect(`/urls/${shortUrl}`);
   } else {
