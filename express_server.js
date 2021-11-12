@@ -260,9 +260,9 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
 
   if (checkEmailUniqueness(email)) {
-    res.status(403).send('Error 403: No one here with that email! learn to type');
+    return res.status(403).send('Error 403: No one here with that email! learn to type');
   }
-
+  
   const serverHashPassword = users[getUID(req.body.email)].password;
   bcrypt.compare(req.body.password, serverHashPassword)
     .then((value) => {
@@ -270,7 +270,7 @@ app.post("/login", (req, res) => {
         res.status(403).send('Error 403: Login Information Inccorect');
       } 
       req.session.user_id = getUID(req.body.email);
-      res.redirect(`/urls`);
+      return res.redirect(`/urls`);
     })
     .catch((err) => {
       console.log(err);
