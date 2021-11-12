@@ -26,8 +26,8 @@ const generateUniqueStringWrapper = function (urlDatabase) {
 
   const generateUniqueRandomString = function () {
 
-    if (Object.keys(urlDatabase).length >= 56800235586) {
-      throw 'Not Possible... why do you need more than 56800235586 shortened urls or users for' //62^6
+    if (Object.keys(urlDatabase).length >= 56800235586) { //we should not have more than 62^6 entries. (62 possible character. 6 entries)
+      return false 
     }
 
     const randomStringAsNumbers = []

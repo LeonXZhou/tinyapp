@@ -24,6 +24,7 @@ const users = {
   }
 };
 
+
 // required npm library import
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -37,7 +38,7 @@ const userHelperFunctionWrapper = require("./userHelperFunctions");
 //destructuring functions with correct "databse enclosed"
 const [generateUniqueUrl, urlsForUser] = generateUniqueStringWrapper(urlDatabase);
 const [generateUniqueUserID,] = generateUniqueStringWrapper(users);
-const { checkEmailUniqueness, authenticateUser, getUID } = userHelperFunctionWrapper(users);
+const { checkEmailUniqueness, getUID } = userHelperFunctionWrapper(users);
 
 // Express Server Declaration
 const app = express();
@@ -47,16 +48,21 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: ['pi314','e278'],
+  keys: ['pi314', 'e278'],
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 
 
 // GET method handlers
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
+app.get("/", (req, res) => {
+  if (users[req.session.user_id]) {
+    res.redirect('urls');
+  }
+  else {
+    res.redirect('login');
+  }
+});
 
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
@@ -174,19 +180,19 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if(!checkEmailUniqueness(req.body.email)){
-  const serverHashPassword = users[getUID(req.body.email)].password
-  bcrypt.compare(req.body.password, serverHashPassword)
-    .then((value) => {
-      if (value) {
-        req.session.user_id = getUID(req.body.email);
-        res.redirect(`/urls`);
-      }
-      else {
-        res.status(403).send('Error 403: Login Information Inccorect')
-      }
-    })
-    .catch((err) => { console.log(err) })
+  if (!checkEmailUniqueness(req.body.email)) {
+    const serverHashPassword = users[getUID(req.body.email)].password
+    bcrypt.compare(req.body.password, serverHashPassword)
+      .then((value) => {
+        if (value) {
+          req.session.user_id = getUID(req.body.email);
+          res.redirect(`/urls`);
+        }
+        else {
+          res.status(403).send('Error 403: Login Information Inccorect')
+        }
+      })
+      .catch((err) => { console.log(err) })
   }
   else {
     res.status(403).send('Error 403: No one here with that email! learn to type')
